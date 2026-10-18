@@ -22,8 +22,10 @@ small_model:
 frontier:
   provider: null             # TODO: "anthropic" or "openai"
   model: null                # TODO: exact model string; record access date in pinned.json
-  max_output_tokens: 16      # direct letter answer; raise only if the model needs reasoning room
-  temperature: 0.0
+  # Opus/Sonnet 5.5 reason before answering and reasoning tokens count toward this cap.
+  # 16 would cut the model off before it writes a letter; 'fail' parses flag truncations.
+  max_output_tokens: 4000
+  temperature: null          # omitted from the request; may be rejected while thinking is on
 
 splits:
   seed: 20261018
