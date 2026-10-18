@@ -1,0 +1,44 @@
+# Single source of truth for the study. Anything that changes a reported number lives here.
+# Values marked TODO are filled in by scripts/stage_assets.py (writes configs/pinned.json)
+# or chosen by the team before the full runs.
+
+paths:
+  raw: data/raw              # parquet snapshots written by stage_assets.py
+  splits: data/splits        # frozen item-ID lists (commit these)
+  results: results           # per-item tables, one folder per run
+  frontier_cache: results/frontier_cache.sqlite
+
+datasets:
+  medmcqa:
+    hf_id: openlifescienceai/medmcqa
+  medqa:
+    hf_id: GBaker/MedQA-USMLE-4-options
+
+small_model:
+  hf_id: Qwen/Qwen3-8B
+  revision: null             # TODO: pinned commit hash, recorded in configs/pinned.json
+  enable_thinking: false
+
+frontier:
+  provider: null             # TODO: "anthropic" or "openai"
+  model: null                # TODO: exact model string; record access date in pinned.json
+  max_output_tokens: 16      # direct letter answer; raise only if the model needs reasoning room
+  temperature: 0.0
+
+splits:
+  seed: 20261018
+  # How duplicates are detected. "question_options" = normalized stem + sorted normalized
+  # options (catches option-shuffled copies, keeps generic stems like "All are true EXCEPT"
+  # that appear with different options). "question" = stem only, as the proposal words it.
+  dedup_key: question_options
+  calibration_size: 1500     # stratified by subject from deduplicated MedMCQA validation
+  ft_train_size: 30000
+  ft_dev_size: 1000
+  pilot_size: 200            # drawn from the calibration split
+
+prompt:
+  version: v1                # bump when the template text changes; it is part of every cache key
+
+permutations:
+  k: 9                       # nine non-identity orders + the original = ten presentations
+  seed: 20261018

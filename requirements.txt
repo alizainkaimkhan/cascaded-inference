@@ -1,0 +1,16 @@
+# torch is installed separately from the CUDA wheel index (see README).
+transformers>=4.51,<5      # Qwen3 support starts at 4.51
+accelerate
+bitsandbytes               # NF4 for QLoRA and the NF4 base control
+peft
+trl
+datasets
+huggingface_hub
+numpy
+pandas
+pyarrow
+pyyaml
+tabulate
+pytest
+anthropic                  # only the provider you use is imported
+openai

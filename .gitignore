@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+logs/
+hf_cache/
+checkpoints/
+
+# Raw data is re-downloadable at the pinned revision; frozen split ID lists are committed.
+data/raw/
+
+# Per-item tables are regenerable from code + pins. The frontier cache is not
+# (API cost, possible deprecation), so it is the one result we keep in git.
+results/*
+!results/frontier_cache.sqlite
