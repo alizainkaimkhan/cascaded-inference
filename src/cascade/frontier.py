@@ -47,6 +47,7 @@ def parse_letter(text: str) -> tuple[str | None, str]:
     (None, 'fail') otherwise. Loose parses are counted and inspected in the pilot."""
     if text is None:
         return None, "fail"
+    text = text.replace("**", "").replace("__", "")  # markdown emphasis, e.g. "**A**"
     m = LETTER_EXACT.match(text)
     if m:
         return m.group(1).upper(), "exact"

@@ -21,6 +21,14 @@ def item_signals(table: pd.DataFrame, temperature: float = 1.0) -> pd.DataFrame:
     out["pred_idx"] = p0["chosen_orig"]
     out["correct"] = p0["correct"].astype(bool)
     out["msp"] = probs.max(axis=1)
+    # log(p_max / (1 - p_max)) computed from logits, so it never saturates: msp rounds to
+    # exactly 1.0 once the top logit leads by ~37, but this keeps ranking those items.
+    z = p0[LOGIT_COLS].to_numpy() / temperature
+    arg = z.argmax(axis=1)
+    top = z[np.arange(len(z)), arg]
+    rest = z.copy()
+    rest[np.arange(len(z)), arg] = -np.inf  # drop only the chosen letter, so ties are handled
+    out["msp_logodds"] = top - np.logaddexp.reduce(rest, axis=1)
     for j, L in enumerate("ABCD"):
         out[f"p_{L}"] = probs[:, j]
     out["letter_mass"] = p0["letter_mass"]

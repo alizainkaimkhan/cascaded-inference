@@ -39,11 +39,19 @@ tests/                   pytest (synthetic data; no GPU or network)
 module load miniforge3/24.3.0-0-gcc-11.5.0-wkw4vym
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda create -y -n cascade python=3.12 && conda activate cascade
-pip install --extra-index-url https://download.pytorch.org/whl/cu124 torch
-pip install -r requirements.txt
-pip freeze > requirements.lock     # commit this
+which python                      # must be ~/.conda/envs/cascade/bin/python before any install
+# Reproduce the exact environment (preferred):
+python -m pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cu128
+# ...or from scratch: torch FIRST from the CUDA 12.8 index (LARCC drivers support CUDA <= 12.9;
+# the default PyPI torch is a CUDA 13 build that cannot see the GPUs), then the rest.
+#   python -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+#   python -m pip install -r requirements.txt
+#   python -m pip list --format=freeze > requirements.lock   # never `pip freeze` (writes file:// paths)
 python -m pytest -q
 ```
+Always use `python -m pip`, never bare `pip`: on LARCC a bare `pip` can belong to a different
+Python than `python`. Add `export PYTHONNOUSERSITE=1` to `~/.bashrc` so stray `~/.local`
+packages are never imported.
 
 **2. Stage data and weights (login node, has internet)**
 ```bash
@@ -75,6 +83,21 @@ python scripts/run_frontier.py --split pilot
 ```bash
 python scripts/pilot_report.py --run base_bf16 --split pilot
 ```
+
+## Fine-tuning (QLoRA)
+
+Training examples are the exact inference prompt plus the gold letter; loss is on the
+answer tokens only, so the trained position is the one evaluation reads (`src/cascade/finetune.py`).
+```bash
+sbatch slurm/train_qlora.sbatch 1 --max-steps 20 --run-name smoke     # smoke test first (~5 min)
+sbatch slurm/train_qlora.sbatch 1                                      # seed 1, full 2 epochs
+# then evaluate in the SAME precision as the base comparison (NF4):
+for s in calibration test medqa_test; do
+  sbatch slurm/run_small.sbatch $s ft_s1 --precision nf4 --adapter checkpoints/ft_s1/adapter
+done
+```
+`checkpoints/<run>/` holds the adapter, `log_history.json` (train and ft_dev loss) and
+`train_meta.json` (GPU-hours, peak memory). Compare fine-tuned runs against `base_nf4`, not `base_bf16`.
 
 ## Conventions
 

@@ -53,7 +53,7 @@ def load_model(model_path: str, precision: str = "bf16", adapter: str | None = N
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
 
-    kwargs = {"torch_dtype": torch.bfloat16, "device_map": {"": 0}}
+    kwargs = {"dtype": torch.bfloat16, "device_map": {"": 0}}
     if precision == "nf4":
         from transformers import BitsAndBytesConfig
 

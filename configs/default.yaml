@@ -41,6 +41,23 @@ splits:
 prompt:
   version: v1                # bump when the template text changes; it is part of every cache key
 
+finetune:                    # QLoRA, proposal section 5.2; held fixed across the three seeds
+  seeds: [1, 2, 3]
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  epochs: 2
+  learning_rate: 2.0e-4
+  lr_scheduler: cosine
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  per_device_batch_size: 16
+  grad_accum: 2              # effective batch 32 -> ~938 steps per epoch on 30k items
+  eval_every_steps: 100      # ft_dev loss; used only to watch for overfitting
+  max_grad_norm: 1.0
+  output_dir: checkpoints
+
 permutations:
   k: 9                       # nine non-identity orders + the original = ten presentations
   seed: 20261018

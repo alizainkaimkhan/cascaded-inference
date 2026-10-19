@@ -19,7 +19,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from cascade.config import load_config, repo_path  # noqa: E402
 from cascade.data import load_split  # noqa: E402
-from cascade.frontier import BACKENDS, FrontierCache, run_uncached  # noqa: E402
+from cascade.frontier import BACKENDS, FrontierCache, parse_letter, run_uncached  # noqa: E402
 from cascade.prompts import IDENTITY, LETTERS, user_message  # noqa: E402
 
 
@@ -50,16 +50,21 @@ def main() -> None:
         print(f"\n{model}: {len(jobs)} items, {n_uncached} uncached")
         return
 
-    backend = BACKENDS[fc["provider"]](model, fc["max_output_tokens"], fc.get("temperature"))
-    run_uncached(backend, cache, model, version, jobs, args.workers)
+    if any(cache.get(model, i, p) is None for i, p in jobs):
+        backend = BACKENDS[fc["provider"]](model, fc["max_output_tokens"], fc.get("temperature"))
+        run_uncached(backend, cache, model, version, jobs, args.workers)
+    else:
+        print(f"all {len(jobs)} items cached; re-exporting without API calls")
 
     rows = []
     for it, (_, prompt) in zip(items.itertuples(index=False), jobs):
         r = cache.get(model, it.item_id, prompt)
+        # Re-parse from the stored raw text every export, so parser fixes apply to cached answers.
+        letter, status = parse_letter(r["response_text"])
         rows.append({
             "item_id": it.item_id, "subject": it.subject, "gold_idx": int(it.gold_idx),
-            "frontier_letter": r["parsed_letter"], "parse_status": r["parse_status"],
-            "frontier_correct": r["parsed_letter"] == LETTERS[int(it.gold_idx)],
+            "frontier_letter": letter, "parse_status": status,
+            "frontier_correct": letter == LETTERS[int(it.gold_idx)],
             "input_tokens": r["input_tokens"], "output_tokens": r["output_tokens"],
             "response_text": r["response_text"],
         })
@@ -77,7 +82,7 @@ def main() -> None:
     (out / f"{args.split}.meta.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
     if summary["parse_status"].get("fail") or summary["parse_status"].get("loose"):
-        print("Inspect non-exact parses:\n", df[df["parse_status"] != "exact"][["item_id", "response_text"]].head(20))
+        print("Inspect non-exact parses:\n", df[df["parse_status"] != "exact"][["item_id", "frontier_letter", "response_text"]].to_string(max_colwidth=120))
 
 
 if __name__ == "__main__":

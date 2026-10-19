@@ -23,7 +23,7 @@ conda activate cascade
 
 export HF_HOME=$HOME/hf_cache
 export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TRANSFORMERS_OFFLINE=1
-export TOKENIZERS_PARALLELISM=false
+export TOKENIZERS_PARALLELISM=false PYTHONNOUSERSITE=1
 
 cd "$SLURM_SUBMIT_DIR"
 nvidia-smi --query-gpu=name,memory.total --format=csv
