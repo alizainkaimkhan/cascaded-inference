@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 LETTER_EXACT = re.compile(r"^\s*(?:answer\s*[:\-]?\s*)?[\(\[]?([ABCD])[\)\]\.:]?\s*$", re.IGNORECASE)
-LETTER_LOOSE = re.compile(r"(?:answer\s*(?:is)?\s*[:\-]?\s*)?[\(\[]?\b([ABCD])\b[\)\]\.:]?")
+ANSWER_PHRASE = re.compile(r"\b[Aa]nswer(?:\s+is)?\s*[:\-]?\s*[\(\[]?([ABCD])\b(?![a-z])")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS responses (
@@ -43,17 +43,32 @@ def sha256(s: str) -> str:
 
 
 def parse_letter(text: str) -> tuple[str | None, str]:
-    """('B', 'exact') for a bare letter answer, ('B', 'loose') if found inside other text,
-    (None, 'fail') otherwise. Loose parses are counted and inspected in the pilot."""
-    if text is None:
+    """Extract the answer letter from a frontier response.
+
+    Returns (letter, status):
+      'exact'  - the whole response is a bare letter ("B", "B.", "(B)", "Answer: B", "**B**")
+      'line'   - the first or last non-empty line is a bare letter (explanation + letter)
+      'phrase' - an explicit "answer is B" / "Answer: B" phrase, unambiguous
+      'fail'   - nothing reliable, or conflicting letters; counted as frontier-wrong
+
+    Never takes a letter out of running prose: the article "A" ("A papule on the hand...")
+    is the most common false match in clinical text.
+    """
+    if not text or not text.strip():
         return None, "fail"
-    text = text.replace("**", "").replace("__", "")  # markdown emphasis, e.g. "**A**"
-    m = LETTER_EXACT.match(text)
+    t = text.replace("**", "").replace("__", "").strip()  # markdown emphasis, e.g. "**A**"
+    m = LETTER_EXACT.match(t)
     if m:
         return m.group(1).upper(), "exact"
-    m = LETTER_LOOSE.search(text)
-    if m:
-        return m.group(1).upper(), "loose"
+    lines = [ln.strip() for ln in t.splitlines() if ln.strip()]
+    found = {mm.group(1).upper() for ln in (lines[0], lines[-1]) if (mm := LETTER_EXACT.match(ln))}
+    if len(found) == 1:
+        return found.pop(), "line"
+    if len(found) > 1:
+        return None, "fail"
+    phrases = set(ANSWER_PHRASE.findall(t))
+    if len(phrases) == 1:
+        return phrases.pop(), "phrase"
     return None, "fail"
 
 

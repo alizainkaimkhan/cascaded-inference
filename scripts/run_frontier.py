@@ -23,6 +23,15 @@ from cascade.frontier import BACKENDS, FrontierCache, parse_letter, run_uncached
 from cascade.prompts import IDENTITY, LETTERS, user_message  # noqa: E402
 
 
+def _stop_reason(raw_json: str | None) -> str | None:
+    """'end_turn', 'max_tokens', 'refusal', ... (Anthropic) or finish_reason (OpenAI)."""
+    try:
+        raw = json.loads(raw_json or "{}")
+    except ValueError:
+        return None
+    return raw.get("stop_reason") or ((raw.get("choices") or [{}])[0].get("finish_reason"))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", required=True)
@@ -66,6 +75,7 @@ def main() -> None:
             "frontier_letter": letter, "parse_status": status,
             "frontier_correct": letter == LETTERS[int(it.gold_idx)],
             "input_tokens": r["input_tokens"], "output_tokens": r["output_tokens"],
+            "stop_reason": _stop_reason(r["raw_json"]),
             "response_text": r["response_text"],
         })
     df = pd.DataFrame(rows)
@@ -76,13 +86,14 @@ def main() -> None:
         "model": model, "split": args.split, "n": len(df),
         "accuracy": float(df["frontier_correct"].mean()),
         "parse_status": df["parse_status"].value_counts().to_dict(),
+        "stop_reason": df["stop_reason"].value_counts(dropna=False).to_dict(),
         "input_tokens_total": int(df["input_tokens"].sum()),
         "output_tokens_total": int(df["output_tokens"].sum()),
     }
     (out / f"{args.split}.meta.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
     if summary["parse_status"].get("fail") or summary["parse_status"].get("loose"):
-        print("Inspect non-exact parses:\n", df[df["parse_status"] != "exact"][["item_id", "frontier_letter", "response_text"]].to_string(max_colwidth=120))
+        print("Inspect non-exact parses:\n", df[df["parse_status"] != "exact"][["item_id", "parse_status", "frontier_letter", "stop_reason", "output_tokens", "response_text"]].to_string(max_colwidth=120))
 
 
 if __name__ == "__main__":

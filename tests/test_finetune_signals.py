@@ -43,7 +43,26 @@ def test_collator_pads_right_and_masks_padding():
 
 def test_parse_letter_markdown_bold_is_exact():
     assert parse_letter("**A**") == ("A", "exact")
-    assert parse_letter("The answer is **C**.")[0] == "C"
+    assert parse_letter("The answer is **C**.") == ("C", "phrase")
+
+
+@pytest.mark.parametrize("text,expected", [
+    # real responses from the full frontier pass
+    ("A painless bilateral genu valgum in a 4-year-old most likely shows metaphyseal cupping.\n\nD", ("D", "line")),
+    ("A papule on the hand that ulcerates in an abattoir worker suggests cutaneous anthrax.\n\nB", ("B", "line")),
+    ("Zygomatic bone articulates with frontal, maxilla, temporal, sphenoid. Not nasal.\n\n**C**", ("C", "line")),
+    ("SE = 1/\u221a100 = 0.1\n\nB", ("B", "line")),
+    ("**D**\n\nThe question looks garbled: the original answer sequences seem to be missing.", ("D", "line")),
+    ("A\nExample 1 of 2", ("A", "line")),
+    # the article "A" in prose must never be read as an answer
+    ("A tack placed below and lateral to the iliopubic tract lies in the triangle of pain.", (None, "fail")),
+    ("", (None, "fail")),
+    ("B\n\nOn reflection the best option is\n\nC", (None, "fail")),       # conflicting letters
+    ("Both look plausible, but the answer is D.", ("D", "phrase")),
+    ("The answer is a matter of debate.", (None, "fail")),                  # lowercase article, not a letter
+])
+def test_parse_letter_cases(text, expected):
+    assert parse_letter(text) == expected
 
 
 def _table(logit_rows):
