@@ -1,0 +1,20 @@
+{
+  "datasets": {
+    "medmcqa": {
+      "hf_id": "openlifescienceai/medmcqa",
+      "revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "staged_at": "2026-10-19T00:27:41+00:00"
+    },
+    "medqa": {
+      "hf_id": "GBaker/MedQA-USMLE-4-options",
+      "revision": "0fb93dd23a7339b6dcd27e241cb9b5eca62d4d18",
+      "staged_at": "2026-10-19T00:27:41+00:00"
+    }
+  },
+  "small_model": {
+    "hf_id": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "local_path": "/home/a0kaim01/.cache/huggingface/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218",
+    "staged_at": "2026-10-19T00:27:41+00:00"
+  }
+}

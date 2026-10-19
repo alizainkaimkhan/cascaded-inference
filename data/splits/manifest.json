@@ -1,0 +1,116 @@
+{
+  "splits": {
+    "ft_train": {
+      "n": 30000,
+      "sha256_ids": "0faed1f88aaa7c83ff5f37d559aa016a24c91af632970b4546cba7a5e866fd19"
+    },
+    "ft_dev": {
+      "n": 1000,
+      "sha256_ids": "2f1d5f1a7191a5be4cf9254048ec55be77b5edd4ad182b5a851bd7cb3ec56d79"
+    },
+    "calibration": {
+      "n": 1500,
+      "sha256_ids": "dfbd5d1a582fcd49dbeeeb77ca5efe114270171590faae0844eb5185e8649ef7"
+    },
+    "test": {
+      "n": 2637,
+      "sha256_ids": "8f6218f2d88436e6e90ef18a2840da029da6df0be85ded3c8745009746b94f2b"
+    },
+    "medqa_test": {
+      "n": 1272,
+      "sha256_ids": "d303ce405ac679b8d8ec34e9f39e832d0aea5e4ef936f0efbe26afbea2cc6bf8"
+    },
+    "pilot": {
+      "n": 200,
+      "sha256_ids": "cb3aafc64959bc0ac3c716f154c8b8d13b3961eaa760bf0270a4f39883f52b08"
+    }
+  },
+  "report": {
+    "dedup_key": "question_options",
+    "seed": 20261018,
+    "medmcqa_train_invalid": 1013,
+    "medmcqa_validation_invalid": 32,
+    "medqa_test_invalid": 1,
+    "dedup_medqa": {
+      "n_in": 1272,
+      "n_dup_groups": 0,
+      "n_dropped_conflicting_gold": 0,
+      "n_dropped_redundant_copies": 0,
+      "n_out": 1272
+    },
+    "dedup_validation": {
+      "n_in": 4151,
+      "n_dup_groups": 13,
+      "n_dropped_conflicting_gold": 2,
+      "n_dropped_redundant_copies": 12,
+      "n_out": 4137
+    },
+    "validation_dropped_overlap_medqa": 0,
+    "train_dropped_overlap_eval": 3,
+    "dedup_train": {
+      "n_in": 181806,
+      "n_dup_groups": 15285,
+      "n_dropped_conflicting_gold": 851,
+      "n_dropped_redundant_copies": 17734,
+      "n_out": 163221
+    },
+    "sizes": {
+      "ft_train": 30000,
+      "ft_dev": 1000,
+      "calibration": 1500,
+      "test": 2637,
+      "medqa_test": 1272,
+      "pilot": 200
+    },
+    "subjects_calibration": {
+      "Anaesthesia": 12,
+      "Anatomy": 83,
+      "Biochemistry": 61,
+      "Dental": 472,
+      "ENT": 19,
+      "Forensic Medicine": 24,
+      "Gynaecology & Obstetrics": 81,
+      "Medicine": 106,
+      "Microbiology": 44,
+      "Ophthalmology": 21,
+      "Orthopaedics": 7,
+      "Pathology": 121,
+      "Pediatrics": 84,
+      "Pharmacology": 87,
+      "Physiology": 61,
+      "Psychiatry": 6,
+      "Radiology": 25,
+      "Skin": 6,
+      "Social & Preventive Medicine": 46,
+      "Surgery": 133,
+      "Unknown": 1
+    },
+    "subjects_test": {
+      "Anaesthesia": 22,
+      "Anatomy": 147,
+      "Biochemistry": 108,
+      "Dental": 829,
+      "ENT": 32,
+      "Forensic Medicine": 42,
+      "Gynaecology & Obstetrics": 143,
+      "Medicine": 186,
+      "Microbiology": 78,
+      "Ophthalmology": 37,
+      "Orthopaedics": 13,
+      "Pathology": 212,
+      "Pediatrics": 149,
+      "Pharmacology": 152,
+      "Physiology": 107,
+      "Psychiatry": 10,
+      "Radiology": 44,
+      "Skin": 11,
+      "Social & Preventive Medicine": 80,
+      "Surgery": 234,
+      "Unknown": 1
+    },
+    "choice_type_eval": {
+      "single": 2783,
+      "multi": 1354
+    }
+  }
+}
