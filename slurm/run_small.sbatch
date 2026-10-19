@@ -14,7 +14,7 @@
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
 
-set -euo pipefail
+set -eo pipefail
 SPLIT=$1; RUN=$2; shift 2
 
 module load miniforge3/24.3.0-0-gcc-11.5.0-wkw4vym   # confirm with `module avail`
