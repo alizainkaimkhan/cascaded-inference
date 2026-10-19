@@ -16,5 +16,10 @@
     "revision": "b968826d9c46dd6066d109eabc6255188de91218",
     "local_path": "/home/a0kaim01/.cache/huggingface/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218",
     "staged_at": "2026-10-19T00:27:41+00:00"
+  },
+  "frontier": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "accessed": "2026-10-19"
   }
 }
