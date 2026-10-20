@@ -15,3 +15,6 @@ data/raw/
 # (API cost, possible deprecation), so it is the one result we keep in git.
 results/*
 !results/frontier_cache.sqlite
+
+# Per-machine settings (e.g. this machine's model snapshot path)
+configs/local.json

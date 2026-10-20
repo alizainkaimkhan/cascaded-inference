@@ -86,3 +86,15 @@ def test_logodds_with_tied_top_letters_is_log_one_over_rest():
     s = item_signals(_table([[3.0, 3.0, 0.0, 0.0]]))
     p = s["msp"].iloc[0]
     assert np.isclose(s["msp_logodds"].iloc[0], np.log(p / (1 - p)))
+
+
+def test_local_json_overrides_pinned(tmp_path, monkeypatch):
+    import json
+    from cascade import config
+    pinned, local = tmp_path / "pinned.json", tmp_path / "local.json"
+    pinned.write_text(json.dumps({"small_model": {"revision": "abc", "local_path": "/home/someone/else"}}))
+    local.write_text(json.dumps({"small_model": {"local_path": "/home/me/snapshot"}}))
+    monkeypatch.setattr(config, "PINNED_PATH", pinned)
+    monkeypatch.setattr(config, "LOCAL_PATH", local)
+    sm = config.load_config()["small_model"]
+    assert sm["revision"] == "abc" and sm["local_path"] == "/home/me/snapshot"

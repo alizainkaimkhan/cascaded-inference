@@ -1,4 +1,5 @@
-"""Load configs/default.yaml, overlaid with configs/pinned.json when it exists."""
+"""Load configs/default.yaml, overlaid with configs/pinned.json (shared revisions) and then
+configs/local.json (this machine only), when they exist."""
 from __future__ import annotations
 
 import json
@@ -10,7 +11,8 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = REPO_ROOT / "configs" / "default.yaml"
-PINNED_PATH = REPO_ROOT / "configs" / "pinned.json"
+PINNED_PATH = REPO_ROOT / "configs" / "pinned.json"   # shared, committed: exact revisions
+LOCAL_PATH = REPO_ROOT / "configs" / "local.json"     # per-machine, git-ignored: e.g. model snapshot path
 
 
 def _deep_update(base: dict, upd: dict) -> dict:
@@ -24,8 +26,9 @@ def _deep_update(base: dict, upd: dict) -> dict:
 
 def load_config(path: Path | str | None = None) -> dict[str, Any]:
     cfg = yaml.safe_load(Path(path or CONFIG_PATH).read_text())
-    if PINNED_PATH.exists():
-        _deep_update(cfg, json.loads(PINNED_PATH.read_text()))
+    for overlay in (PINNED_PATH, LOCAL_PATH):
+        if overlay.exists():
+            _deep_update(cfg, json.loads(overlay.read_text()))
     return cfg
 
 

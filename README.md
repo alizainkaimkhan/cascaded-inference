@@ -3,6 +3,8 @@
 CSE-645 project (Kaimkhani, Musa). Qwen3-8B, QLoRA-fine-tuned on MedMCQA, cascaded to a frontier LLM.
 We measure how fine-tuning changes calibration, discrimination, and the cascade's cost–accuracy frontier.
 
+**New collaborator? Start with [`docs/ONBOARDING.md`](docs/ONBOARDING.md).** Status reports live in `docs/reports/`.
+
 ## Design rule
 
 **Every model run writes one per-item table and nothing else.** Everything downstream
