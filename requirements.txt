@@ -11,6 +11,7 @@ pandas
 pyarrow
 pyyaml
 tabulate
+matplotlib                 # compare_runs.py figures
 pytest
 anthropic                  # only the provider you use is imported
 openai
