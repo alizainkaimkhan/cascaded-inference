@@ -101,6 +101,18 @@ done
 `checkpoints/<run>/` holds the adapter, `log_history.json` (train and ft_dev loss) and
 `train_meta.json` (GPU-hours, peak memory). Compare fine-tuned runs against `base_nf4`, not `base_bf16`.
 
+## Comparing runs (calibration, temperature scaling, cascade)
+
+```bash
+python scripts/compare_runs.py --runs base_nf4 ft_s1 --split test            # base vs one seed
+python scripts/compare_runs.py --runs base_nf4 ft_s1 ft_s2 ft_s3 --split test # + mean ± sd over seeds
+python scripts/compare_runs.py --runs base_bf16 base_nf4 --split test --tag precision
+```
+CPU only, about a minute. The first run is the reference; temperatures are fit on `calibration` and applied to the
+evaluation split. Writes `results/compare/<tag>/<split>/report.md` (accuracy, ECE/Brier/NLL raw vs scaled,
+AUROC/AURC/E-AURC, cascade accuracy at 10/20/30/50% escalation, the 0.9-threshold regime, paired bootstrap
+differences) plus `reliability.png`, `risk_coverage.png`, `cascade.png`.
+
 ## Conventions
 
 - MedMCQA `cop` is 0-indexed (0 = `opa`). MedQA items get IDs `medqa-test-NNNN` by row order of the pinned revision.

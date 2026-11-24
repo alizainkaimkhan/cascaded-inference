@@ -59,16 +59,15 @@ def brier_toplabel(conf, correct) -> float:
 # ---------------------------------------------------------------------------
 
 def _average_ranks(x: np.ndarray) -> np.ndarray:
+    """1-based ranks with ties sharing their average rank (vectorised)."""
+    x = np.asarray(x)
     order = np.argsort(x, kind="mergesort")
     xs = x[order]
+    starts = np.flatnonzero(np.r_[True, xs[1:] != xs[:-1]])
+    ends = np.r_[starts[1:], len(x)] - 1
+    avg = (starts + ends) / 2 + 1
     ranks = np.empty(len(x))
-    i = 0
-    while i < len(x):
-        j = i
-        while j + 1 < len(x) and xs[j + 1] == xs[i]:
-            j += 1
-        ranks[order[i:j + 1]] = (i + j) / 2 + 1
-        i = j + 1
+    ranks[order] = np.repeat(avg, ends - starts + 1)
     return ranks
 
 
@@ -86,11 +85,11 @@ def auroc(conf, correct) -> float:
 def _tie_mean(sorted_keys: np.ndarray, sorted_vals: np.ndarray) -> np.ndarray:
     """Replace each value by the mean of its tie group. Prefix sums of the result are the
     expected prefix sums under random ordering within ties."""
-    out = sorted_vals.astype(float).copy()
-    boundaries = np.flatnonzero(np.diff(sorted_keys)) + 1
-    for g in np.split(np.arange(len(sorted_keys)), boundaries):
-        out[g] = sorted_vals[g].mean()
-    return out
+    vals = np.asarray(sorted_vals, float)
+    starts = np.flatnonzero(np.r_[True, sorted_keys[1:] != sorted_keys[:-1]])
+    sizes = np.diff(np.r_[starts, len(vals)])
+    sums = np.add.reduceat(vals, starts) if len(vals) else np.array([])
+    return np.repeat(sums / sizes, sizes)
 
 
 def risk_coverage(conf, correct) -> tuple[np.ndarray, np.ndarray]:
