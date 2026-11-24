@@ -3,6 +3,7 @@
 
     python scripts/train_qlora.py --seed 1
     python scripts/train_qlora.py --seed 1 --max-steps 20 --run-name smoke   # quick check
+    python scripts/train_qlora.py --seed 1 --epochs 1                        # ablation -> ft1ep_s1
 
 Writes checkpoints/<run>/adapter/ (the LoRA weights), plus train_meta.json and
 log_history.json (training and ft_dev loss curves, GPU-hours, peak memory). Evaluate with:
@@ -30,6 +31,8 @@ def main() -> None:
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--run-name", default=None, help="default: ft_s<seed>")
     ap.add_argument("--max-steps", type=int, default=-1, help="cap steps (smoke tests); -1 = full epochs")
+    ap.add_argument("--epochs", type=float, default=None,
+                    help="override finetune.epochs (ablation); default run name becomes ft<E>ep_s<seed>")
     ap.add_argument("--limit-train", type=int, default=None, help="first N training items only (smoke tests)")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -41,8 +44,12 @@ def main() -> None:
                               TrainingArguments)
 
     cfg = load_config()
-    ft, sm = cfg["finetune"], cfg["small_model"]
-    run = args.run_name or f"ft_s{args.seed}"
+    ft, sm = dict(cfg["finetune"]), cfg["small_model"]
+    default_run = f"ft_s{args.seed}"
+    if args.epochs is not None and args.epochs != ft["epochs"]:
+        ft["epochs"] = args.epochs          # recorded in train_meta.json via finetune_config
+        default_run = f"ft{args.epochs:g}ep_s{args.seed}"
+    run = args.run_name or default_run
     out_dir = repo_path(ft["output_dir"]) / run
     if (out_dir / "adapter").exists() and not args.overwrite:
         sys.exit(f"{out_dir}/adapter exists (use --overwrite)")
